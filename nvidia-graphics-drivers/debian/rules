@@ -1,0 +1,612 @@
+#!/usr/bin/make -f
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+include /usr/share/dpkg/architecture.mk
+include /usr/share/dpkg/pkg-info.mk
+
+include debian/rules.defs
+NVIDIA_TESLA		?=
+NVIDIA_LEGACY		?=
+WATCH_VERSION		?= $(or $(subst yes,$(TESLA_MAJOR),$(NVIDIA_TESLA)),$(NVIDIA_LEGACY))
+WATCH_PATTERN		?=
+GIT_BRANCH		?= $(if $(variant),$(variant)/main,$(version_major))
+XORG_ABI_LIST		?=
+XORG_BOUND		?=
+LINUX_KMOD_VARIANT	?=
+LINUX_KMOD_TESTED	?=
+NVIDIA_LEGACY_CHECK	?=
+NVIDIA_SETTINGS		?= nvidia-settings$(-variant)
+ARCH_CANDIDATES		?= amd64 i386 armhf arm64 ppc64el
+ARCH_LIST		?= amd64
+NO_DRIVER_ARCH_LIST	?=
+NO_AUTOPKGTEST_ARCH_LIST?=
+NO_GSP_ARCH_LIST	?=
+
+NVIDIA_RELEASE		 = $(DEB_VERSION_UPSTREAM)
+version			 = $(NVIDIA_RELEASE)
+version_major		 = $(firstword $(subst ., ,$(version)))
+ifeq (yes,$(NVIDIA_TESLA))
+variant			 = $(if $(NVIDIA_TESLA),tesla)
+variant_description	 = $(if $(NVIDIA_TESLA), (Tesla version))
+variant_description_short= $(if $(NVIDIA_TESLA), (Tesla version))
+else ifneq (,$(NVIDIA_TESLA))
+variant			 = $(if $(NVIDIA_TESLA),tesla-$(NVIDIA_TESLA))
+variant_description	 = $(if $(NVIDIA_TESLA), (Tesla $(NVIDIA_TESLA) version))
+variant_description_short= $(if $(NVIDIA_TESLA), (Tesla $(NVIDIA_TESLA)))
+else
+variant			 = $(if $(NVIDIA_LEGACY),legacy-$(NVIDIA_LEGACY)xx)
+variant_description	 = $(if $(NVIDIA_LEGACY), ($(NVIDIA_LEGACY)xx legacy version))
+variant_description_short= $(if $(NVIDIA_LEGACY), ($(NVIDIA_LEGACY)xx legacy))
+endif
+-variant		 = $(if $(variant),-$(variant))
+trailing_minus		 = $(if $(filter %0 %1 %2 %3 %4 %5 %6 %7 %8 %9,$(variant)),-)
+nvidia			 = nvidia$(-variant)
+nvidia-			 = $(nvidia)$(trailing_minus)
+nvidia_if_variant	 = $(if $(variant),$(nvidia)-)
+current			 = $(if $(variant),$(variant),current)
+module-current		 = $(current)$(LINUX_KMOD_VARIANT)
+module			 = nvidia-$(module-current)
+nvidia-kernel		 = $(nvidia)$(LINUX_KMOD_VARIANT)-kernel
+libcuda1		 = lib$(nvidia_if_variant)cuda1
+watch_pattern		 = $(or $(WATCH_PATTERN),$(if $(WATCH_VERSION),$(WATCH_VERSION)(?:\.[\d\.\-]+)?),\d[\d\.\-]*)
+debhelper_compat	:= $(shell sed -rn 's/.*debhelper-compat \(= ([0-9]+)\).*/\1/p' debian/control)
+has_driver		 = $(filter $(DEB_HOST_ARCH),$(DRIVER_ARCH_LIST))
+DRIVER_ARCH_LIST	 = $(filter-out $(NO_DRIVER_ARCH_LIST),$(ARCH_LIST))
+AUTOPKGTEST_ARCH_LIST	 = $(filter-out $(NO_AUTOPKGTEST_ARCH_LIST),$(DRIVER_ARCH_LIST))
+GSP_ARCH_LIST		 = $(filter-out $(NO_GSP_ARCH_LIST),$(DRIVER_ARCH_LIST))
+
+# system libdir
+libdir			?= usr/lib/$(DEB_HOST_MULTIARCH)
+# nvidia version specific directory below $(libdir)
+nvidia_private		 = nvidia/$(current)
+
+CONTROL_PREFIXES	 = nvidia
+CONTROL_PREFIXES	+= firmware-nvidia-gsp
+CONTROL_PREFIXES	+= libnvidia
+CONTROL_PREFIXES	+= libgl1-nvidia
+CONTROL_PREFIXES	+= libglx-nvidia0
+CONTROL_PREFIXES	+= libegl-nvidia0
+CONTROL_PREFIXES	+= libgles-nvidia1 libgles-nvidia2
+CONTROL_PREFIXES	+= libcuda1
+CONTROL_PREFIXES	+= libcudadebugger1
+CONTROL_PREFIXES	+= libnvcuvid1
+CONTROL_PREFIXES	+= libnvoptix1
+CONTROL_PREFIXES	+= xserver-xorg-video-nvidia
+RENAME_libcuda1		 = $(libcuda1)
+RENAME_libcudadebugger1	 = lib$(nvidia_if_variant)cudadebugger1
+RENAME_libnvcuvid1	 = lib$(nvidia_if_variant)nvcuvid1
+RENAME_libnvoptix1	 = lib$(nvidia_if_variant)nvoptix1
+renamed_prefix		 = $(or $(RENAME_$1),$(subst nvidia,$(if $(filter %nvidia0 %nvidia1 %nvidia2,$1),$(nvidia-),$(nvidia)),$1))
+CONTROL_PREFIXES_RENAMED = $(foreach p,$(CONTROL_PREFIXES),$(call renamed_prefix,$p))
+
+# $1=file, $2=prefix
+applyprefixrename	 = $(patsubst debian/$2%,debian/$(call renamed_prefix,$2)%,$1)
+# $1=file, $2=prefixlist
+applyprefixrenamelist	 = $(if $2,$(call applyprefixrenamelist,$(call applyprefixrename,$1,$(firstword $2)),$(wordlist 2,$(words $2),$2)),$1)
+
+ALL_CONTROL	:= $(wildcard $(patsubst %,debian/%*,$(CONTROL_PREFIXES)))
+LEGACY_CONTROL	:= $(wildcard $(patsubst %,debian/%*,$(CONTROL_PREFIXES_RENAMED)))
+RENAME_CONTROL	 = $(filter-out $(LEGACY_CONTROL),$(ALL_CONTROL))
+RENAMED_CONTROL	 = $(foreach f,$(RENAME_CONTROL),$(call applyprefixrenamelist,$f,$(CONTROL_PREFIXES)))
+
+TEMPLATE_DIRS	 = debian
+TEMPLATE_DIRS	+= debian/module/debian
+TEMPLATE_DIRS	+= debian/patches/module
+TEMPLATE_DIRS	+= debian/detect
+TEMPLATE_DIRS	+= debian/tests
+TEMPLATES	:= $(filter-out %.modules.in,$(wildcard $(addsuffix /*.in,$(TEMPLATE_DIRS))))
+
+AUTOGEN		 = $(TEMPLATES:.in=)
+AUTOGEN		+= $(RENAMED_CONTROL:.in=)
+AUTOGEN		+= debian/module/debian/bug-control
+AUTOGEN		+= debian/module/debian/control.modules.in
+AUTOGEN		+= debian/bug-control
+AUTOGEN		+= debian/substvars
+AUTOGEN		+= $(AUTOKEEP)
+AUTOKEEP	 = debian/watch
+AUTOKEEP	+= debian/tests/autopkgtest-pkg-dkms.conf
+AUTOKEEP	+= debian/tests/control
+AUTOKEEP	+= debian/control
+AUTOCLEAN	 = $(filter-out $(AUTOKEEP),$(AUTOGEN))
+
+empty		 =
+space		 = $(empty) $(empty)
+comma		 = ,
+xorg_depends	 = $(foreach abi, $(XORG_ABI_LIST), xorg-video-abi-$(abi) |)
+xorg_depends	+= $(comma) xserver-xorg-core $(XORG_BOUND)
+xorg_provides	 = xorg-driver-video
+
+deps_nvidia_kmod_binary	 = $${nvidia-kernel}-dkms (= $${binary:Version})                [$${nvidia:archlist:driver}] |
+deps_nvidia_kmod_binary	+= $${nvidia-kernel}-$${nvidia:Version}                         [$${nvidia:archlist:driver}] |
+deps_nvidia_kmod_binary	+= $${nvidia}-open-kernel-$${nvidia:Version}                    [$${nvidia:archlist:driver}] |
+deps_nvidia_kmod_binary	+= nvidia-open-kernel-$${nvidia:Version}                        [$${nvidia:archlist:driver}] |
+deps_nvidia_kmod_source	 = $${nvidia-kernel}-dkms (>= $${nvidia:Version})               [$${nvidia:archlist:driver}] |
+deps_nvidia_kmod_source	+= $${nvidia-kernel}-source (>= $${nvidia:Version})             [$${nvidia:archlist:driver}] |
+deps_nvidia_kmod_source	+= $${nvidia}-open-kernel-source (>= $${nvidia:Version})        [$${nvidia:archlist:driver}] |
+deps_nvidia_kmod_source	+= nvidia-open-kernel-source (>= $${nvidia:Version})            [$${nvidia:archlist:driver}] |
+
+
+.PHONY: autogen prepare patch
+autogen: debian/control $(AUTOGEN)
+prepare: autogen unpack-stamp
+ifneq (,$(has_driver))
+prepare: nvidia.ids compare-copyright-license
+prepare: nvidia-open.ids
+endif
+patch: prepare
+
+NVIDIA-Linux-%:
+	sh $*/${NVIDIA_FILENAME_$*} --extract-only
+	ln -s ${NVIDIA_DIRNAME_$*} $@
+	gunzip $@/*.1.gz
+
+ifneq (,$(filter i386,$(NO_DRIVER_ARCH_LIST)))
+NVIDIA-Linux-i386: NVIDIA-Linux-amd64
+	$(RM) -r $@
+	cp -al $</32 $@
+	cp -al $</*.icd $@
+	cp -al $</*.json* $@
+endif
+
+ifneq (,$(filter armhf,$(NO_DRIVER_ARCH_LIST)))
+NVIDIA-Linux-armhf: NVIDIA-Linux-amd64
+	$(RM) -r $@
+	mkdir $@
+	cp -al $</*.json $@
+endif
+
+ifneq (,$(filter ppc64el,$(NO_DRIVER_ARCH_LIST)))
+NVIDIA-Linux-ppc64el: NVIDIA-Linux-amd64
+	$(RM) -r $@
+	mkdir $@
+	cp -al $</*.icd $@
+	cp -al $</*.json* $@
+endif
+
+# Unpack all architectures, we may need files from all of them.
+unpack-stamp: $(patsubst %,NVIDIA-Linux-%,$(ARCH_LIST))
+	$(if $(filter $(DEB_HOST_ARCH),$(ARCH_LIST)),,$(error Architecture $(DEB_HOST_ARCH) unsupported.))
+	dh_testdir
+	$(RM) NVIDIA-Linux
+	ln -s NVIDIA-Linux-$(DEB_HOST_ARCH) NVIDIA-Linux
+ifneq (,$(has_driver))
+	QUILT_PATCHES=debian/patches QUILT_SERIES=series-postunpack quilt --quiltrc /dev/null push -a || test $$? = 2
+	# bashism is used on a few architectures only
+	sed -i 's/==/=/g' NVIDIA-Linux/nvidia-bug-report.sh
+endif
+	ls -al
+	touch $@
+
+nv-readme.ids: unpack-stamp
+	sed -r -n '/^Chapter [0-9]+\. GSP Firmware|^A1\. CURRENT NVIDIA GPUS|^A1\. NVIDIA GEFORCE GPUS/,/^Chapter|^Appendix|^Below/ s/^(.{41}|.{49}) ([0-9a-fA-F]{4})($$| .*)/10de\2/p' \
+		NVIDIA-Linux/README.txt \
+		| tr a-f A-F | sort -u > $@
+	@set -e -x ; \
+	if ! cmp -s debian/$@ $@ ; then \
+		diff -u debian/$@ $@ || true ; \
+		: "*** Supported PCI IDs have changed. See diff above. Aborting. ***"; \
+		exit 1 ; \
+	fi
+ifneq (,$(variant))
+	@set -e -x ; \
+	if ! cmp -s debian/detect/$(nvidia).ids $@ ; then \
+		diff -u debian/detect/$(nvidia).ids $@ || true ; \
+		: "*** Supported PCI IDs of the $(nvidia) variant have changed. See diff above. Aborting. ***"; \
+		exit 1 ; \
+	fi
+endif
+
+nv-readme-open.ids: unpack-stamp
+	sed -r -n '/^[0-9]+A?\. SUPPORTED GPUS/,/^Chapter/ s/^(.{41}|.{49}) ([0-9a-fA-F]{4})($$| .*)/10de\2/p' \
+		NVIDIA-Linux/README.txt \
+		| tr a-f A-F | sort -u > $@
+	@set -e -x ; \
+	if ! cmp -s debian/$@ $@ ; then \
+		diff -u debian/$@ $@ || true ; \
+		: "*** Supported PCI IDs have changed. See diff above. Aborting. ***"; \
+		exit 1 ; \
+	fi
+
+nvidia.ids: nv-readme.ids
+	cp $< $@
+
+nvidia-open.ids: nv-readme-open.ids
+	cp $< $@
+
+# Reformat the LICENSE to the format needed for debian/copyright.
+LICENSE.txt: unpack-stamp
+	sed -e 's/^ *//; s/ *$$//; s/^$$/./; s/^/ /;' NVIDIA-Linux/LICENSE > $@
+
+# Compare the license in debian/copyright with the LICENSE shipped in the archive.
+compare-copyright-license: LICENSE.txt
+	sed -e '1,/^License: NVIDIA-graphics-drivers/d; 1,/^License: NVIDIA-graphics-drivers$$/d; /^$$\|^Comment:$$/,$$d; /^ \.$$/d' debian/copyright > copyright.tmp
+	sed -e '/^ \.$$/d' LICENSE.txt > LICENSE.tmp
+	diff -w copyright.tmp LICENSE.tmp
+	$(RM) copyright.tmp LICENSE.tmp
+
+.PHONY: binary binary-arch binary-indep build clean install
+binary binary-arch binary-indep build clean install:
+	dh $@
+
+override_dh_auto_clean:
+	$(RM) -r .pc
+	$(RM) NVIDIA-Linux
+	$(RM) -r $(foreach a,$(ARCH_LIST),NVIDIA-Linux-$a $(NVIDIA_DIRNAME_$a))
+	$(RM) -r build
+	$(RM) -r kernel-source-tree
+	$(RM) -r test-module-build
+	$(RM) nvidia.ids nv-readme.ids pci.ids.nvidia*
+	$(RM) nvidia-open.ids nv-readme-open.ids
+	$(RM) LICENSE.txt LICENSE.tmp copyright.tmp
+	test ! -d debian/po || debconf-updatepo
+
+execute_after_dh_clean:
+	$(RM) $(AUTOCLEAN)
+	$(MAKE) -f debian/rules $(AUTOKEEP)
+# this will fail unless debian/control{,.md5sum} is up-to-date
+	md5sum --check debian/control.md5sum --status || \
+		$(MAKE) -f debian/rules debian/control-real
+
+CONTROL_FILES	 = debian/control.in debian/gen-control.pl debian/rules debian/rules.defs
+
+debian/control: $(CONTROL_FILES) debian/changelog
+	md5sum --check debian/control.md5sum --status || \
+		$(MAKE) -f debian/rules debian/control-real
+	touch $@
+
+override_dh_auto_configure: prepare
+
+build-stamp: unpack-stamp
+	$(RM) -r build
+	cp -al NVIDIA-Linux/ build
+	# Use the amd64 changelog for all architectures to be M-A:same safe.
+	cp -al NVIDIA-Linux-amd64/NVIDIA_Changelog build/
+	$(RM) -r build/32
+	$(RM) -r build/libglvnd_install_checker
+	$(RM) -r build/kernel-open
+ifeq (amd64,$(DEB_HOST_ARCH))
+	chmod -x build/*.dll
+endif
+ifneq (,$(has_driver))
+	gzip -9fn build/nvidia-smi.1
+
+	# Apply the kernel module patches.
+	cd build/kernel && QUILT_PATCHES=../../debian/patches/module quilt --quiltrc /dev/null push -a || test $$? = 2
+
+	# This copy of the changelog is going to be installed into the module
+	# binary packages.
+	cp -al build/NVIDIA_Changelog build/kernel/
+
+	# Fix permissions.
+	chmod -R a-sx,u=rwX,go=rX build/kernel
+endif
+
+	touch $@
+
+override_dh_auto_build: build-stamp
+
+override_dh_auto_install:
+	$(RM) -r debian/tmp
+	cp -al build/ debian/tmp
+	$(RM) -r debian/tmp/kernel/.pc
+
+module_source_pkg	 = debian/$(nvidia-kernel)-source
+module_source_txz	 = $(module_source_pkg)/usr/src/$(nvidia-kernel).tar.xz
+
+pack-module-source:
+	find $(module_source_pkg) \( -name '*.binary' -o -name '*.in' -not -name '*.modules.in' \) -print -delete
+	tar c \
+		-C $(module_source_pkg)/usr/src \
+		--owner=root --group=root \
+		--mode=a=rX,u+w \
+		--sort=name \
+		--mtime='@$(SOURCE_DATE_EPOCH)' \
+		--clamp-mtime \
+		modules | xz -9 > $(module_source_txz)
+	tar tfv $(module_source_txz)
+	$(RM) -r $(module_source_pkg)/usr/src/modules
+
+# only invoked manually
+kernel-source-tree: unpack-stamp
+	$(RM) -r $@
+	cp -a NVIDIA-Linux/kernel $@
+	cd $@ && QUILT_PATCHES=../debian/patches/module quilt --quiltrc /dev/null push -a || test $$? = 2
+
+ifneq (,$(has_driver))
+execute_after_dh_install: pack-module-source
+
+# Test that the patches can be applied to the module source
+# and a module can be built.
+override_dh_auto_test: J_FLAG ?= $(patsubst parallel=%,-j%,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
+override_dh_auto_test: TEST_KERNEL ?= $(shell ls -dvr1 /lib/modules/*/build 2>/dev/null | cut -d/ -f4 | head -n 1)
+override_dh_auto_test: build-stamp
+	$(RM) -r test-module-build
+	cp -a build/kernel test-module-build
+	$(MAKE) $(J_FLAG) -C test-module-build NV_VERBOSE=1 KERNEL_UNAME=$(TEST_KERNEL)
+endif
+
+override_dh_installchangelogs:
+	dh_installchangelogs debian/tmp/NVIDIA_Changelog
+
+override_dh_bugfiles:
+	dh_bugfiles -A
+
+override_dh_shlibdeps:
+	dh_shlibdeps -l/$(libdir)/$(nvidia_private)
+	test -z "$$(ls debian/*.substvars 2>/dev/null)" || sed -r -i 's/libnvidia-(e?glcore)-$(version)/lib$(nvidia)-\1 (= $${binary:Version})/g' debian/*.substvars
+
+override_dh_gencontrol:
+	dh_gencontrol -- \
+		-V'nvidia:Version=$(version)' \
+		-V'nvidia:Version:major=$(version_major)' \
+		-V'nvidia:xorgDepends=$(xorg_depends)' \
+		-V'nvidia:xorgProvides=$(xorg_provides)' \
+		-V'nvidia=$(nvidia)' \
+		-V'nvidia-=$(nvidia-)' \
+		-V'nvidia-if-variant=$(nvidia_if_variant)' \
+		-V'nvidia-kernel=$(nvidia-kernel)' \
+		-V'nvidia:Variant=$(variant)' \
+		-V'nvidia:VariantDesc=$(variant_description)' \
+		-V'nvidia:VariantDescShort=$(variant_description_short)' \
+		-V'nvidia:legacy-check=$(NVIDIA_LEGACY_CHECK)' \
+		-V'libcuda1=$(libcuda1)' \
+		-V'nvidia-settings=$(NVIDIA_SETTINGS)' \
+		-V'nvidia:debhelper-compat=$(debhelper_compat)' \
+		$(foreach a,$(ARCH_CANDIDATES),-V'arch:$a=$(filter $a,$(DRIVER_ARCH_LIST))') \
+		-V'nvidia:archlist:driver=$(DRIVER_ARCH_LIST)' \
+		-V'nvidia:archlist:gsp=$(GSP_ARCH_LIST)' \
+		-V'nvidia:kmod:binary=$(deps_nvidia_kmod_binary)' \
+		-V'nvidia:kmod:source=$(deps_nvidia_kmod_source)' \
+		-V'nvidia:kmod:tested:Linux=$(strip $(or $(LINUX_KMOD_TESTED_$(DEB_HOST_ARCH)),$(LINUX_KMOD_TESTED),???))' \
+		-Vnvidia:kmod:Description="`cat debian/control.kmod`" \
+		-Vnvidia:Models="`cat debian/control.models`"
+
+# used by dpkg-genchanges
+debian/substvars:
+	echo 'nvidia:VariantDesc=$(variant_description)' > $@
+	echo 'nvidia:VariantDescShort=$(variant_description_short)' >> $@
+
+# Do not run dh_strip here.  The NVIDIA license says:
+#
+#     2.1.2 Linux/FreeBSD Exception.  Notwithstanding the foregoing terms of
+#     Section 2.1.1, SOFTWARE designed exclusively for use on the Linux or
+#     FreeBSD operating systems, or other operating systems derived from the
+#     source code to these operating systems, may be copied and
+#     redistributed, provided that the binary files thereof are not modified
+#     in any way (except for unzipping of compressed files).
+#
+# Stripping the binary modules would constitute modifying the binary files
+# in a way other than unzipping of compressed files.
+override_dh_dwz:
+override_dh_strip:
+override_dh_strip_nondeterminism:
+
+############################################################################
+
+# Generating control files
+%:: %.in debian/rules debian/rules.defs
+	perl -p \
+	-e 's{#VERSION#}{$(version)}g;' \
+	-e 's{#MAJOR#}{$(version_major)}g;' \
+	-e 's{#NVIDIA#}{$(nvidia)}g;' \
+	-e 's{#VARIANT#}{$(-variant)}g;' \
+	-e 's{#CURRENT#}{$(current)}g;' \
+	-e 's{#NVIDIA-KERNEL#}{$(nvidia-kernel)}g;' \
+	-e 's{#MODULE#}{$(module)}g;' \
+	-e 's{#MODULE_CURRENT#}{$(module-current)}g;' \
+	-e 's{#WATCH_PATTERN#}{$(subst \,\\,$(watch_pattern))}g;' \
+	-e 's{#LIBDIR#}{$(libdir)}g;' \
+	-e 's{#PRIVATE#}{$(nvidia_private)}g;' \
+	-e 's{#ARCH_LIST#}{$(DRIVER_ARCH_LIST)}g;' \
+	-e 's{#AUTOPKGTEST_ARCH_LIST#}{$(AUTOPKGTEST_ARCH_LIST)}g;' \
+	-e 's{#GSP_ARCH_LIST#}{$(GSP_ARCH_LIST)}g;' \
+	< $< > $@
+	chmod --reference=$< $@
+
+debian/module/debian/control.modules.in: debian/control debian/module/debian/control.modules.in.binary
+	sed -n '/^#/d; 0,/^$$/p' $< > $@
+	cat $(filter-out $<,$^) >> $@
+
+debian/module/debian/bug-control: debian/bug-control
+	cp $< $@
+	echo "" >> $@
+	echo "Submit-As: $(nvidia-kernel)-source" >> $@
+
+
+# Renaming control files for variant packaging
+define rename-template
+$2%: $1%
+	cp -a $$< $$@
+endef
+ifneq (,$(variant))
+$(foreach p,$(CONTROL_PREFIXES),$(eval $(call rename-template,$p,$(call renamed_prefix,$p))))
+endif
+
+include debian/bug-control.mk
+
+############################################################################
+
+# intentionally fails to prevent being run during build
+debian/control-real: $(CONTROL_FILES)
+	debian/gen-control.pl \
+		-V'nvidia=$(nvidia)' \
+		-V'nvidia-=$(nvidia-)' \
+		-V'nvidia-if-variant=$(nvidia_if_variant)' \
+		-V'nvidia-kernel=$(nvidia-kernel)' \
+		-V'nvidia:Variant=$(-variant)' \
+		-V'libcuda1=$(libcuda1)' \
+		-V'Vcs-Git:Branch=$(if $(GIT_BRANCH), -b $(GIT_BRANCH))' \
+		$(foreach a,$(ARCH_CANDIDATES),-V'arch:$a=$(filter $a,$(DRIVER_ARCH_LIST))') \
+		-- \
+		debian/control.in > debian/control.new
+	mv debian/control.new debian/control
+	md5sum debian/control $^ > debian/control.md5sum
+	@echo
+	@echo This target is made to fail intentionally, to make sure
+	@echo that it is NEVER run during the automated build. Please
+	@echo ignore the following error, the debian/control file has
+	@echo been generated SUCCESSFULLY.
+	@echo
+	exit 1
+
+# only invoked manually
+%.txt: %.list
+	cat $< \
+	| sed -e 's/^10DE.... *//; /^$$/d' \
+	| uniq \
+	| sed -e 's/ /#/g; s/#*$$/,/; $$ s/,$$/./' \
+	| ( tr '\n' ' '; echo ) \
+	| fold -s -w 78 \
+	| sed -e 's/#/ /g; s/ *$$//' > $@
+
+# only invoked manually
+pci.ids.nvidia: /usr/share/misc/pci.ids
+	sed -nr '/^10de/,/^10df/ { /^\t\t/d; /\t/ { s/  (.*) \[(.*)\]$$/  \2 [\1]/; s/^\t/10de/; p} }' $< > $@.tmp
+	cut -c 1-8 $@.tmp | tr a-f A-F > $@.tmp1
+	cut -c 9- $@.tmp | paste -d '' $@.tmp1 - > $@
+	$(RM) $@.tmp $@.tmp1
+
+# only invoked manually
+%.names: %.ids pci.ids.nvidia
+	cat $< | \
+	while read id ; do \
+		grep ^$$id pci.ids.nvidia || echo $$id ; \
+	done > $@
+
+# only invoked manually
+file-lists: $(patsubst %,debian/files_$(NVIDIA_RELEASE)_%,$(DRIVER_ARCH_LIST))
+debian/files_$(NVIDIA_RELEASE)_%: NVIDIA-Linux-%
+	(cd $< && find .) | sed 's/$(NVIDIA_RELEASE)/VERSION/g' | sort > $@
+
+# only invoked manually
+check-whitespace:
+	grep -r --exclude-dir=.svn --exclude-dir=.git --exclude '*.patch' -E '\s$$' debian || true
+
+############################################################################
+
+CACHE			?= ../.cache
+ORIGDIR			?= nvidia-graphics-drivers-$(NVIDIA_RELEASE).orig
+TARBALL_BASE		?= nvidia-graphics-drivers$(-variant)_$(NVIDIA_RELEASE).orig
+TARBALL_SUFFIX		?= .tar.gz
+TARBALL			?= $(TARBALL_BASE)$(TARBALL_SUFFIX)
+ORIGDIR.empty		?= $(ORIGDIR)
+TARBALL.empty		?= $(TARBALL)
+
+# $1 = arch
+get_download_url	 = $(or $(HTTPURL_PREFIX_$(strip $1)),$(HTTPURL_PREFIX))/$(if $(HTTPURL_ARCHDIR_$(strip $1)),$(HTTPURL_ARCHDIR_$(strip $1))/)$(if $2,,$(or $(HTTPURL_VERDIR),$(NVIDIA_RELEASE))/)$(NVIDIA_FILENAME_$(strip $1))
+get_origdir		 = $(or $(ORIGDIR.$(strip $1)),$(ORIGDIR)-$(strip $1))
+get_tarball		 = $(or $(TARBALL.$(strip $1)),$(TARBALL_BASE)-$(strip $1)$(TARBALL_SUFFIX))
+
+get-orig-source-prepare:
+	$(RM) -r get-orig-source
+	mkdir get-orig-source
+
+get-orig-source-prepare/%: get-orig-source-prepare
+	$(RM) $(call get_tarball,$*)
+	mkdir get-orig-source/$(call get_origdir,$*)
+
+get-orig-source-download/%: get-orig-source-prepare
+	ln -v $(CACHE)/$(NVIDIA_FILENAME_$*) get-orig-source/ 2>/dev/null || \
+		wget $(call get_download_url,$*) -P get-orig-source/ || \
+		wget $(call get_download_url,$*,1) -P get-orig-source/
+	if [ -d $(CACHE) ] && [ ! -f $(CACHE)/$(NVIDIA_FILENAME_$*) ]; then \
+		ln -v get-orig-source/$(NVIDIA_FILENAME_$*) $(CACHE) ; fi
+
+get-orig-source-files/%: get-orig-source-prepare/% get-orig-source-download/%
+	@set -e -x ; \
+	    cd get-orig-source ; \
+	    mv $(NVIDIA_FILENAME_$*) $(call get_origdir,$*)/ ; \
+	    chmod 0755 $(call get_origdir,$*)/* ; \
+	    touch $(call get_origdir,$*).stamp -r $$(ls -tr $$(find $(call get_origdir,$*) -type f) | tail -n 1)
+
+get-orig-source-pack/%: get-orig-source-files/%
+	@set -e -x ; \
+	    cd get-orig-source ; \
+	    tar cv \
+	        --clamp-mtime --mtime="./$(call get_origdir,$*).stamp" \
+	        --sort=name \
+		--owner=root --group=src \
+		$(call get_origdir,$*) \
+		| gzip -n -9 > $(call get_tarball,$*) ; \
+	    touch $(call get_tarball,$*) -r $(call get_origdir,$*).stamp
+	mv get-orig-source/$(call get_tarball,$*) .
+
+get-orig-source-files/empty: get-orig-source-prepare/empty $(foreach a,$(DRIVER_ARCH_LIST),get-orig-source-pack/$a)
+	touch get-orig-source/$(call get_origdir,empty).stamp -r $$(ls -tr $(foreach a,$(DRIVER_ARCH_LIST),$(call get_tarball,$a)) | tail -n 1)
+
+.PHONY: get-orig-source
+get-orig-source: get-orig-source-pack/empty
+	$(RM) -r get-orig-source
+
+ifneq (,$(variant))
+get-orig-source-link/%:
+	ln -sf $(subst $(-variant),,$(call get_tarball,$*)) $(call get_tarball,$*)
+
+.PHONY: get-orig-links
+get-orig-links: get-orig-source-link/empty $(foreach a,$(DRIVER_ARCH_LIST),get-orig-source-link/$a)
+endif
+
+############################################################################
+
+# The tarballs are kept in a separate git repository and use the git-lfs
+# storage backend. To keep the local disk usage low, this repository is
+# checked out sparsely, only tarballs for versions that have been built
+# locally will be available locally.
+
+UPSTREAM_NAME		 = nvidia-graphics-drivers
+UPSTREAM_VERSION	 = $(NVIDIA_RELEASE)
+TARBALL_LIST		 = $(foreach a,empty $(DRIVER_ARCH_LIST),$(call get_tarball,$a))
+
+GIT			?= git
+TARBALL_REPOSITORY	 = https://salsa.debian.org/nvidia-team/tarballs-$(UPSTREAM_NAME).git
+TARBALL_TREE		 = ../tarballs-$(UPSTREAM_NAME)
+
+define sparse-checkout-current
+	grep '^$(UPSTREAM_VERSION)/' $(TARBALL_TREE)/.git/info/sparse-checkout || \
+		echo '$(UPSTREAM_VERSION)/*' >> $(TARBALL_TREE)/.git/info/sparse-checkout
+
+endef
+
+define test-file-exists
+	test -f $1
+
+endef
+
+$(TARBALL_TREE):
+	$(RM) -r $@.tmp
+	$(GIT) clone --no-checkout $(TARBALL_REPOSITORY) $@.tmp
+	cd $@.tmp && $(GIT) lfs install --local
+	cd $@.tmp && $(GIT) config --local core.sparsecheckout true
+	echo .gitattributes >> $@.tmp/.git/info/sparse-checkout
+	cd $@.tmp && $(GIT) checkout
+	mv $@.tmp $@
+
+$(TARBALL_TREE)/$(UPSTREAM_VERSION): | $(TARBALL_TREE)
+	$(sparse-checkout-current)
+	cd $(TARBALL_TREE) && $(GIT) pull --ff-only && $(GIT) checkout
+
+tarball-tree: $(TARBALL_TREE)
+
+# only invoked manually
+writable-tarball-tree: tarball-tree
+	cd $(TARBALL_TREE) && $(GIT) remote set-url origin $(patsubst https://salsa.debian.org/%,git@salsa.debian.org:%,$(TARBALL_REPOSITORY))
+
+# invoked from gbp buildpackage preexport hook
+check-current-tarballs: $(TARBALL_TREE)/$(UPSTREAM_VERSION)
+	$(foreach t,$(TARBALL_LIST),$(call test-file-exists,$(TARBALL_TREE)/$(UPSTREAM_VERSION)/$t))
+
+# only invoked manually
+ifeq (,$(variant))
+commit-current-tarballs: MSG = add $(UPSTREAM_VERSION) tarballs
+commit-current-tarballs: get-orig-source
+else
+commit-current-tarballs: MSG = add $(UPSTREAM_VERSION) $(variant) symlinks
+commit-current-tarballs: get-orig-links
+endif
+commit-current-tarballs:
+	$(sparse-checkout-current)
+	mkdir -p $(TARBALL_TREE)/$(UPSTREAM_VERSION)
+	mv $(TARBALL_LIST) $(TARBALL_TREE)/$(UPSTREAM_VERSION)/
+	cd $(TARBALL_TREE) && $(GIT) add $(UPSTREAM_VERSION) && if $(GIT) status -s $(UPSTREAM_VERSION) | grep ^A ; then $(GIT) commit -m "$(MSG)" $(UPSTREAM_VERSION) ; fi

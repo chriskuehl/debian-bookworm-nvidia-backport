@@ -1,0 +1,2 @@
+nvidia-dbus.conf	usr/share/dbus-1/system.d/
+nvidia-powerd		usr/sbin/

@@ -1,0 +1,42 @@
+# We use alternative dependency templates:
+# * In each template "ocl-icd-libopencl1" (maybe versioned) is used as the
+#   first alternative so that, by default, the free ICD Loader will be
+#   installed on a Debian system
+#   We use it on all parts as dependencies can be reordered (see #739409)
+# * The first template (default template) is in fact always added (see #737731)
+#   by dpkg-shlibdeps
+#   This always generates an alternate dependency on the virtual package
+#   "libopencl1"
+# * The next template is for symbols specific to this implementation
+#   There should be none, as their usage would prevent using alternate
+#   implementations of libOpenCL.so.1
+#   This is the only exception as there will be neither an "ocl-icd-libopencl1"
+#   nor any other alternative to "#PACKAGE# #MINVER#"
+# * the following ones are for symbols from OpenCL 1.0, 1.1, 1.2, 2.0, ...
+#   They all generate a dependency on the versioned virtual package
+#   "libopencl-VERSION-1" (the last -1 is the soversion of current libopencl)
+#   Note: as OpenCL 1.0 does not really support ICD and as OpenCL 1.1 is
+#     supported by all current implementation, OpenCL 1.0 is treated as
+#     OpenCL 1.1 with respect to dependencies
+#   Note bis: #MINVER# is used with the real package, however, as
+#     ocl-icd-libopencl1 and #PACKAGE# provides the virtual packages, this
+#     version enforcement is purely cosmetic
+libOpenCL.so.1 ocl-icd-libopencl1 | #PACKAGE# #MINVER# | libopencl1
+# symbols specific to this implementation - would forbid using alternate implementations
+| #PACKAGE# #MINVER#
+# symbols conforming to the OpenCL standards - can use alternate implementations
+| ocl-icd-libopencl1 (>= 1.0)	| #PACKAGE# #MINVER# | libopencl-1.1-1
+| ocl-icd-libopencl1 (>= 1.0)	| #PACKAGE# #MINVER# | libopencl-1.2-1
+| ocl-icd-libopencl1 (>= 2.2.0)	| #PACKAGE# #MINVER# | libopencl-2.0-1
+| ocl-icd-libopencl1 (>= 2.2.8)	| #PACKAGE# #MINVER# | libopencl-2.1-1
+| ocl-icd-libopencl1 (>= 2.2.12)| #PACKAGE# #MINVER# | libopencl-2.2-1
+| ocl-icd-libopencl1 (>= 2.2.13)| #PACKAGE# #MINVER# | libopencl-3.0-1
+# As NVIDIA uses versioned symbols, we use this information instead of
+# listing all symbols.
+ (symver|optional)OPENCL_1.0 0 2
+ (symver|optional)OPENCL_1.1 260 2
+ (symver|optional)OPENCL_1.2 349 3
+ (symver|optional)OPENCL_2.0 378 4
+ (symver|optional)OPENCL_2.1 460 5
+ (symver|optional)OPENCL_2.2 460 6
+ (symver|optional)OPENCL_3.0 460 7

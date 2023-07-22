@@ -1,0 +1,19 @@
+Author: Andreas Beckmann <anbe@debian.org>
+Description: fix ppc64el ftfbs
+
+--- a/nvidia/nvlink_common.h
++++ b/nvidia/nvlink_common.h
+@@ -28,6 +28,13 @@
+ extern "C" {
+ #endif
+ 
++#if defined(NV_ASM_PROM_H_PRESENT)
++#if defined(NV_LINUX_OF_H_PRESENT)
++#include <linux/of.h>
++#endif
++#include <asm/prom.h>
++#endif
++
+ #include "nvtypes.h"
+ #include "nvCpuUuid.h"
+ #include "nvlink_errors.h"

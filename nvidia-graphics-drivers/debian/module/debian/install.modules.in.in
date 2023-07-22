@@ -1,0 +1,5 @@
+#MODULE#.ko			lib/modules/#KVERS#/nvidia/
+#MODULE#-modeset.ko		lib/modules/#KVERS#/nvidia/
+#MODULE#-drm.ko			lib/modules/#KVERS#/nvidia/
+#MODULE#-uvm.ko			lib/modules/#KVERS#/nvidia/
+#MODULE#-peermem.ko		lib/modules/#KVERS#/nvidia/

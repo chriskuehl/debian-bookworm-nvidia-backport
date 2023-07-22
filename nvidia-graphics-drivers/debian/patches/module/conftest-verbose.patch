@@ -1,0 +1,86 @@
+Author: Andreas Beckmann <anbe@debian.org>
+Description: dump the generated conftest headers
+
+--- a/Kbuild
++++ b/Kbuild
+@@ -166,6 +166,16 @@ NV_CONFTEST_HEADERS += $(obj)/conftest/h
+ NV_CONFTEST_HEADERS += $(NV_CONFTEST_COMPILE_TEST_HEADERS)
+ 
+ 
++.PHONY: conftest-verbose
++conftest-verbose:
++	@echo 'NV_CONFTEST_CMD=$(NV_CONFTEST_CMD)'
++	@echo 'NV_CONFTEST_CFLAGS=$(NV_CONFTEST_CFLAGS)'
++	@echo 'KBUILD_CFLAGS=$(KBUILD_CFLAGS)'
++	@echo 'LINUXINCLUDE=$(LINUXINCLUDE)'
++	@echo 'LDFLAGS=$(LDFLAGS)'
++	@echo 'KBUILD_LDFLAGS=$(KBUILD_LDFLAGS)'
++	@echo 'ARCH=$(ARCH)'
++
+ #
+ # Generate a header file for a single conftest compile test. Each compile test
+ # header depends on conftest.sh, as well as the generated conftest/headers.h
+@@ -190,6 +200,8 @@ define NV_GENERATE_COMPILE_TEST_HEADER
+ 	@mkdir -p $(obj)/conftest
+ 	@# concatenate /dev/null to prevent cat from hanging when $$^ is empty
+ 	@cat $$^ /dev/null > $$@
++	@echo " CONFTEST $$(notdir $$@):"
++	@cat $$@
+ endef
+ 
+ #
+@@ -209,9 +221,11 @@ $(eval $(call NV_GENERATE_COMPILE_TEST_H
+ $(eval $(call NV_GENERATE_COMPILE_TEST_HEADER,symbols,$(NV_CONFTEST_SYMBOL_COMPILE_TESTS)))
+ $(eval $(call NV_GENERATE_COMPILE_TEST_HEADER,types,$(NV_CONFTEST_TYPE_COMPILE_TESTS)))
+ 
+-$(obj)/conftest/patches.h: $(NV_CONFTEST_SCRIPT)
++$(obj)/conftest/patches.h: $(NV_CONFTEST_SCRIPT) | conftest-verbose
+ 	@mkdir -p $(obj)/conftest
+ 	@$(NV_CONFTEST_CMD) patch_check > $@
++	@echo " CONFTEST $(notdir $@):"
++	@cat $@
+ 
+ 
+ # Each of these headers is checked for presence with a test #include; a
+@@ -313,6 +327,7 @@ NV_HEADER_PRESENCE_PART = $(addprefix $(
+ define NV_HEADER_PRESENCE_CHECK
+  $$(call NV_HEADER_PRESENCE_PART,$(1)): $$(NV_CONFTEST_SCRIPT) $(obj)/conftest/uts_release
+ 	@mkdir -p $$(dir $$@)
++	@echo " CONFTEST: $(1)"
+ 	@$$(NV_CONFTEST_CMD) test_kernel_header '$$(NV_CONFTEST_CFLAGS)' '$(1)' > $$@
+ endef
+ 
+@@ -322,6 +337,8 @@ $(foreach header,$(NV_HEADER_PRESENCE_TE
+ # Concatenate all of the parts into headers.h.
+ $(obj)/conftest/headers.h: $(call NV_HEADER_PRESENCE_PART,$(NV_HEADER_PRESENCE_TESTS))
+ 	@cat $^ > $@
++	@echo " CONFTEST $(notdir $@):"
++	@cat $@
+ 
+ clean-dirs := $(obj)/conftest
+ 
+@@ -342,7 +359,8 @@ BUILD_SANITY_CHECKS = \
+ 
+ .PHONY: $(BUILD_SANITY_CHECKS)
+ 
+-$(BUILD_SANITY_CHECKS):
++$(BUILD_SANITY_CHECKS): | conftest-verbose
++	@echo " CONFTEST: $(notdir $@)"
+ 	@$(NV_CONFTEST_CMD) $@ full_output
+ 
+ # Perform all sanity checks before generating the conftest headers
+@@ -351,11 +369,13 @@ $(NV_CONFTEST_HEADERS): | $(BUILD_SANITY
+ 
+ # Make the conftest headers depend on the kernel version string
+ 
+-$(obj)/conftest/uts_release: NV_GENERATE_UTS_RELEASE
++$(obj)/conftest/uts_release: NV_GENERATE_UTS_RELEASE | conftest-verbose
+ 	@mkdir -p $(dir $@)
+ 	@NV_UTS_RELEASE="// Kernel version: `$(NV_CONFTEST_CMD) compile_tests '$(NV_CONFTEST_CFLAGS)' uts_release`"; \
+ 	if ! [ -f "$@" ] || [ "$$NV_UTS_RELEASE" != "`cat $@`" ]; \
+ 	then echo "$$NV_UTS_RELEASE" > $@; fi
++	@echo " CONFTEST $(notdir $@):"
++	@cat $@
+ 
+ .PHONY: NV_GENERATE_UTS_RELEASE
+ 

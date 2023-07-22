@@ -1,0 +1,79 @@
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the nvidia-driver package.
+#
+# Yuri Kozlov <yuray@komyakino.ru>, 2012.
+# Lev Lamberov <dogsleg@debian.org>, 2018.
+msgid ""
+msgstr ""
+"Project-Id-Version: nvidia-graphics-drivers\n"
+"Report-Msgid-Bugs-To: nvidia-graphics-drivers@packages.debian.org\n"
+"POT-Creation-Date: 2023-01-09 15:40+0100\n"
+"PO-Revision-Date: 2018-01-01 18:31+0500\n"
+"Last-Translator: Lev Lamberov <dogsleg@debian.org>\n"
+"Language-Team: Russian <debian-l10n-russian@lists.debian.org>\n"
+"Language: ru\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 2.0.5\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
+"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+#. Type: boolean
+#. Description
+#. Translators, please only translate this file in src:nvidia-graphics-drivers.
+#. From there it will be merged into all other src:nvidia-graphics-drivers-*
+#. packages.
+#. Translators, do not translate the ${substitution} ${variables}.
+#. ${vendor} will be substituted with 'NVIDIA' or 'Fglrx' (without quotes, of
+#. course), ${free_name} will become 'Nouveau' or 'Radeon' (no quotes, again)
+#. and the ${*driver} variables will be replaced with package names.
+#: ../nvidia-legacy-check.templates:3001
+msgid "Install ${vendor} driver despite unsupported graphics card?"
+msgstr ""
+"Установить драйвер ${vendor} несмотря на то, что графическая карта им не "
+"поддерживается?"
+
+#. Type: boolean
+#. Description
+#: ../nvidia-legacy-check.templates:3001
+msgid ""
+"This system has a graphics card which is no longer handled by the ${vendor} "
+"driver (package ${driver}). You may wish to keep the package installed - for "
+"instance to drive some other card - but the card with the following chipset "
+"won't be usable:"
+msgstr ""
+"В системе обнаружена графическая карта, которая больше не поддерживается "
+"драйвером ${vendor} (пакет ${driver}). Вы можете оставить пакет "
+"установленным (например, для какой-то другой карты), но карта со следующим "
+"набором микросхем работать не будет:"
+
+#. Type: boolean
+#. Description
+#: ../nvidia-legacy-check.templates:3001
+msgid ""
+"The above card requires either the non-free legacy ${vendor} driver (package "
+"${legacy_driver}) or the free ${free_name} driver (package ${free_driver})."
+msgstr ""
+"Для указанной ранее карты требуется несвободный устаревший драйвер ${vendor} "
+"(пакет ${legacy_driver}) или свободный драйвер ${free_name} (пакет "
+"${free_driver})."
+
+#. Type: boolean
+#. Description
+#: ../nvidia-legacy-check.templates:3001
+msgid ""
+"Use the update-glx command to switch between different installed drivers."
+msgstr ""
+"Для переключения между разными установленными драйверами используйте команду "
+"update-glx."
+
+#. Type: boolean
+#. Description
+#: ../nvidia-legacy-check.templates:3001
+msgid ""
+"Before the ${free_name} driver can be used you must remove ${vendor} "
+"configuration from xorg.conf (and xorg.conf.d/)."
+msgstr ""
+"Перед тем как использовать драйвер ${free_name}, вам нужно удалить настройку "
+"${vendor} из xorg.conf (и xorg.conf.d/)."

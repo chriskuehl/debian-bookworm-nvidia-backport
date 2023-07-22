@@ -1,0 +1,43 @@
+# If needed, set to the major part of the upstream version number.
+#TESLA_MAJOR		 =
+#NVIDIA_TESLA		 = yes
+#NVIDIA_TESLA		 = $(TESLA_MAJOR)
+#NVIDIA_LEGACY		 =
+#WATCH_VERSION		 =
+
+NVIDIA_SETTINGS		 = nvidia-settings (>= $(version_major))
+NVIDIA_LEGACY_CHECK	 = $${nvidia}-legacy-check (>= 495) [$${nvidia:archlist:driver}]
+
+XORG_ABI_LIST		 = 25 24 23 20 19 18 15 14 13 12 11 10 8 6.0
+XORG_BOUND		 = (<< 2:21.99)
+
+LINUX_KMOD_TESTED	 = 6.2
+
+ARCH_LIST		 = amd64
+ARCH_LIST		+= i386
+ARCH_LIST		+= armhf
+ARCH_LIST		+= arm64
+ARCH_LIST		+= ppc64el
+NO_DRIVER_ARCH_LIST	 = i386 armhf
+ifeq (,$(TESLA_MAJOR))
+NO_DRIVER_ARCH_LIST	+= ppc64el
+endif
+NO_GSP_ARCH_LIST	 = ppc64el
+
+NVIDIA_DIRNAME_amd64	 = NVIDIA-Linux-x86_64-${NVIDIA_RELEASE}
+NVIDIA_DIRNAME_arm64	 = NVIDIA-Linux-aarch64-${NVIDIA_RELEASE}
+NVIDIA_DIRNAME_ppc64el	 = NVIDIA-Linux-ppc64le-${NVIDIA_RELEASE}
+NVIDIA_FILENAME_amd64	 = ${NVIDIA_DIRNAME_amd64}.run
+NVIDIA_FILENAME_arm64	 = ${NVIDIA_DIRNAME_arm64}.run
+NVIDIA_FILENAME_ppc64el	 = ${NVIDIA_DIRNAME_ppc64el}.run
+
+ifeq (,$(TESLA_MAJOR))
+HTTPURL_PREFIX		 = https://http.download.nvidia.com/XFree86
+HTTPURL_PREFIX_ppc64el	 = https://us.download.nvidia.com/Ubuntu
+HTTPURL_ARCHDIR_amd64	 = Linux-x86_64
+HTTPURL_ARCHDIR_arm64	 = Linux-aarch64
+HTTPURL_ARCHDIR_ppc64el	 =
+else
+HTTPURL_PREFIX		 = https://us.download.nvidia.com/tesla
+#HTTPURL_VERDIR		 = $(subst $(space),.,$(wordlist 1,2,$(subst .,$(space),$(NVIDIA_RELEASE))))
+endif

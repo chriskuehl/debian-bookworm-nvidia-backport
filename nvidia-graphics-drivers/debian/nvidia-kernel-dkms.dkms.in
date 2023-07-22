@@ -1,0 +1,36 @@
+# DKMS configuration for the NVIDIA kernel module.  -*- sh -*-
+
+PACKAGE_NAME="#MODULE#"
+PACKAGE_VERSION="#VERSION#"
+
+# Only kernels from 3.10 onwards are supported.
+BUILD_EXCLUSIVE_KERNEL="^(3\.[1-9][0-9]|[4-9]\.)"
+
+# The NVIDIA driver does not support real-time kernels.
+BUILD_EXCLUSIVE_CONFIG="!CONFIG_PREEMPT_RT !CONFIG_PREEMPT_RT_FULL"
+
+AUTOINSTALL=yes
+
+MAKE[0]="env NV_VERBOSE=1 \
+    make ${parallel_jobs+-j$parallel_jobs} modules KERNEL_UNAME=${kernelver}"
+CLEAN="make KERNEL_UNAME=${kernelver} clean"
+
+BUILT_MODULE_NAME[0]="nvidia"
+DEST_MODULE_NAME[0]="$PACKAGE_NAME"
+DEST_MODULE_LOCATION[0]="/updates/dkms"
+
+BUILT_MODULE_NAME[1]="nvidia-modeset"
+DEST_MODULE_NAME[1]="$PACKAGE_NAME-modeset"
+DEST_MODULE_LOCATION[1]="/updates/dkms"
+
+BUILT_MODULE_NAME[2]="nvidia-drm"
+DEST_MODULE_NAME[2]="$PACKAGE_NAME-drm"
+DEST_MODULE_LOCATION[2]="/updates/dkms"
+
+BUILT_MODULE_NAME[3]="nvidia-uvm"
+DEST_MODULE_NAME[3]="$PACKAGE_NAME-uvm"
+DEST_MODULE_LOCATION[3]="/updates/dkms"
+
+BUILT_MODULE_NAME[4]="nvidia-peermem"
+DEST_MODULE_NAME[4]="$PACKAGE_NAME-peermem"
+DEST_MODULE_LOCATION[4]="/updates/dkms"

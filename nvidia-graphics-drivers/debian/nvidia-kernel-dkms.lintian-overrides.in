@@ -1,0 +1,5 @@
+# These object files are linked into kernel modules.
+unstripped-binary-or-object
+
+# False positives in non-string parts.
+spelling-error-in-binary

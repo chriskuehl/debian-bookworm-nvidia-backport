@@ -1,0 +1,3 @@
+#!/usr/bin/dh-exec --with=filter
+libEGL_nvidia.so.#VERSION#		#LIBDIR#/#PRIVATE#/
+libnvidia-vulkan-producer.so.#VERSION#	#LIBDIR#/#PRIVATE#/	[!i386]

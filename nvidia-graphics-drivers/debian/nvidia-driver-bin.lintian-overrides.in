@@ -1,0 +1,8 @@
+# The NVIDIA license does not allow any form of modification.
+hardening-no-bindnow
+hardening-no-fortify-functions
+hardening-no-pie
+
+# The current setup involving multiple chained alternatives would be very
+# hard to migrate to /usr/libexec.
+executable-in-usr-lib

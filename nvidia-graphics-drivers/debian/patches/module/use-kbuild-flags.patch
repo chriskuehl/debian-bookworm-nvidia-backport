@@ -1,0 +1,61 @@
+Author: Andreas Beckmann <anbe@debian.org>
+Author: Tomas Janousek <tomi@nomi.cz>
+Description: use KBUILD_CFLAGS and (KBUILD_)LDFLAGS
+ allows building a amd64 kernel module with i386 user space
+ .
+ skip -Werror=* since that breaks how conftest.sh detects stuff
+ .
+ skip $(GCC_PLUGINS_CFLAGS): fixes build failure when a kernel
+ is built with CONFIG_GCC_PLUGINS, CONFIG_GCC_PLUGIN_STRUCTLEAK
+ and CONFIG_GCC_PLUGIN_RANDSTRUCT -- Tomas Janousek
+ .
+ ensure some defined strings retain enclosing double quotes
+
+--- a/Kbuild
++++ b/Kbuild
+@@ -148,6 +148,12 @@ NV_CONFTEST_CMD := /bin/sh $(NV_CONFTEST
+ NV_CFLAGS_FROM_CONFTEST := $(shell $(NV_CONFTEST_CMD) build_cflags)
+ 
+ NV_CONFTEST_CFLAGS = $(NV_CFLAGS_FROM_CONFTEST) $(EXTRA_CFLAGS) -fno-pie
++NV_CONFTEST_CFLAGS += \
++	$(patsubst -DARM64_ASM_ARCH=%,-DARM64_ASM_ARCH="%",\
++	$(filter-out -Werror% $(GCC_PLUGINS_CFLAGS),\
++	$(KBUILD_CFLAGS)\
++	)\
++	)
+ 
+ NV_CONFTEST_COMPILE_TEST_HEADERS := $(obj)/conftest/macros.h
+ NV_CONFTEST_COMPILE_TEST_HEADERS += $(obj)/conftest/functions.h
+--- a/nvidia/nvidia.Kbuild
++++ b/nvidia/nvidia.Kbuild
+@@ -103,7 +103,7 @@ always += $(NVIDIA_INTERFACE)
+ always-y += $(NVIDIA_INTERFACE)
+ 
+ $(obj)/$(NVIDIA_INTERFACE): $(addprefix $(obj)/,$(NVIDIA_OBJECTS))
+-	$(LD) -r -o $@ $^
++	$(LD) $(or $(KBUILD_LDFLAGS),$(LDFLAGS)) -r -o $@ $^
+ 
+ 
+ #
+--- a/Makefile
++++ b/Makefile
+@@ -114,7 +114,7 @@ else
+   # cannot be defined in the *Kbuild files, which are only used during stage 1.
+ 
+   %-linux.o: modules
+-	$(LD) $(NV_MODULE_COMMON_SCRIPTS) -r -o $@ \
++	$(LD) $(or $(KBUILD_LDFLAGS),$(LDFLAGS)) $(NV_MODULE_COMMON_SCRIPTS) -r -o $@ \
+ 	  $(subst nv,nvidia,$*).mod.o $(subst nv,nvidia,$*)/$*-interface.o
+ 
+   # Kbuild's "clean" rule won't clean up the conftest headers on its own, and
+--- a/nvidia-modeset/nvidia-modeset.Kbuild
++++ b/nvidia-modeset/nvidia-modeset.Kbuild
+@@ -77,7 +77,7 @@ always += $(NVIDIA_MODESET_INTERFACE)
+ always-y += $(NVIDIA_MODESET_INTERFACE)
+ 
+ $(obj)/$(NVIDIA_MODESET_INTERFACE): $(addprefix $(obj)/,$(NVIDIA_MODESET_OBJECTS))
+-	$(LD) -r -o $@ $^
++	$(LD) $(or $(KBUILD_LDFLAGS),$(LDFLAGS)) -r -o $@ $^
+ 
+ #
+ # Register the conftests needed by nvidia-modeset.ko

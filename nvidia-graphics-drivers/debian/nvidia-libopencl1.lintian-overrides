@@ -1,0 +1,13 @@
+# The NVIDIA license does not allow any form of modification.
+[i386]: binary-file-built-without-LFS-support
+[i386]: specific-address-in-shared-library
+hardening-no-bindnow
+hardening-no-fortify-functions
+
+# There are multiple vendors providing this library.
+package-name-doesnt-match-sonames libOpenCL1
+
+# The free libOpenCL.so.1 library is preferred.
+symbols-declares-dependency-on-other-package ocl-icd-libopencl1 (libOpenCL.so.1) [symbols]
+symbols-declares-dependency-on-other-package ocl-icd-libopencl1 (>= *) (libOpenCL.so.1) [symbols]
+symbols-file-missing-build-depends-package-field

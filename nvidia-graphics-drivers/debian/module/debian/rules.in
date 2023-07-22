@@ -1,0 +1,78 @@
+#!/usr/bin/make -f
+
+#export DH_VERBOSE=1
+
+export NV_VERBOSE := 1
+
+MODULE		 = #MODULE#
+MODSRCPKG	 = $(PACKAGE)-source
+
+# The following variable is required by module-assistant:
+#   PACKAGE: modules binary package prefix (as in debian/control.modules.in)
+PACKAGE		 = #NVIDIA-KERNEL#
+
+MA_DIR		?= /usr/share/modass
+include $(MA_DIR)/include/generic.make
+include $(MA_DIR)/include/common-rules.make
+
+# The following variables are defined by module-assistant:
+#   KVERS:   kernel version string (version-abi-flavor-arch)
+#   KSRC:    path to the kernel headers/sources (/lib/modules/$(KVERS)/build)
+#   PKGNAME: package name to be built ($(PACKAGE)-$(KVERS))
+#   VERSION: package version to be built (module-source-debversion+kernel-debversion)
+#   DEB_DESTDIR: destination of the to-be-built package (/usr/src)
+
+get_built_using	?= $(subst (= ),,$(shell dpkg-query -f='$${source:Package} (= $${source:Version})' -W $1))
+
+MAKE_J_FLAG	?= $(if $(filter -j%,$(MAKEFLAGS)),,$(patsubst parallel=%,-j%,$(filter parallel=%,$(DEB_BUILD_OPTIONS))))
+
+KERNEL_SPEC	 = $(if $(filter /lib/modules/$(KVERS)/%,$(KSRC)),KERNEL_UNAME="$(KVERS)",SYSSRC="$(KSRC)")
+
+
+kdist_config: prep-deb-files
+
+binary-modules: kdist_config
+	dh_testdir
+	dh_testroot
+	dh_prep
+	dh_installdirs
+# Build and install the module.
+	$(MAKE) $(MAKE_J_FLAG) modules $(KERNEL_SPEC)
+ifneq (nvidia,$(MODULE))
+	mv nvidia.ko $(MODULE).ko
+	mv nvidia-modeset.ko $(MODULE)-modeset.ko
+	mv nvidia-drm.ko $(MODULE)-drm.ko
+	mv nvidia-uvm.ko $(MODULE)-uvm.ko
+	mv nvidia-peermem.ko $(MODULE)-peermem.ko
+endif
+# Build the package.
+	dh_install
+	dh_installdocs $(wildcard debian/changelog.nvidia*-kernel*-source*)
+	dh_installchangelogs NVIDIA_Changelog
+	dh_installmodules
+	dh_bugfiles
+	dh_lintian
+	dh_link
+	dh_strip_nondeterminism
+	dh_compress
+	dh_fixperms
+	dh_missing
+	dh_dwz
+	dh_strip
+	dh_installdeb
+	dh_gencontrol -- -v$(VERSION) \
+		-V'built-using:kernel=$(call get_built_using,linux-headers-$(KVERS))' \
+		-V'built-using:module=$(call get_built_using,$(MODSRCPKG))' \
+		-Vnvidia:Models="`cat debian/control.models`"
+	dh_md5sums
+	dh_builddeb --destdir=$(DEB_DESTDIR)
+	dpkg --info $(KPKG_DEST_DIR)/$(PACKAGE)-$(KVERS)_$(VERSION)_*.deb
+	dpkg --contents $(KPKG_DEST_DIR)/$(PACKAGE)-$(KVERS)_$(VERSION)_*.deb
+
+kdist_clean:
+	test -f debian/control || sed -r 's/(##|#|_)KVERS\1/$(KVERS)/g' debian/control.modules.in > debian/control
+	dh_testdir
+	$(MAKE) clean $(KERNEL_SPEC)
+	dh_clean $(patsubst %.modules.in,%,$(wildcard debian/*.modules.in))
+
+.PHONY: kdist_config binary-modules kdist_clean

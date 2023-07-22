@@ -1,0 +1,5 @@
+libnvidia-opticalflow.so.1 #PACKAGE# #MINVER#
+* Build-Depends-Package: #PACKAGE#
+ NvOFAPICreateInstanceCuda@Base 418
+ (arch=!i386)NvOFAPICreateInstanceVk@Base 525
+ NvOFGetMaxSupportedApiVersion@Base 430

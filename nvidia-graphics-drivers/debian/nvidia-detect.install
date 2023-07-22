@@ -1,0 +1,13 @@
+#!/usr/bin/dh-exec --with=filter
+debian/detect/nvidia-detect			usr/bin/
+debian/detect/nvidia-legacy-*.ids		usr/share/nvidia/	[amd64 i386 armhf]
+debian/detect/nvidia-418.ids			usr/share/nvidia/	[amd64]
+debian/detect/nvidia-tesla-418.ids		usr/share/nvidia/	[amd64 ppc64el]
+debian/detect/nvidia-tesla-440.ids		usr/share/nvidia/	[amd64 ppc64el]
+debian/detect/nvidia-tesla-450.ids		usr/share/nvidia/	[amd64 arm64 ppc64el]
+debian/detect/nvidia-tesla-460.ids		usr/share/nvidia/	[amd64 arm64 ppc64el]
+debian/detect/nvidia-470.ids			usr/share/nvidia/	[amd64 arm64]
+debian/detect/nvidia-tesla-470.ids		usr/share/nvidia/	[amd64 arm64 ppc64el]
+debian/detect/nvidia-tesla.ids			usr/share/nvidia/	[amd64 arm64 ppc64el]
+nvidia.ids					usr/share/nvidia/	[!ppc64el]
+nvidia-open.ids					usr/share/nvidia/	[!ppc64el]

@@ -1,0 +1,104 @@
+# nvidia-driver translation to Spanish
+# Copyright (C) 2012 Software in the Public Interest, SPI Inc.
+# This file is distributed under the same license as the nvidia-driver package.
+#
+# Changes:
+# - Initial translation
+#      Fernando C. Estrada <fcestrada@fcestrada.com> , 2012
+# - Revision
+#      Matías Bellone <matiasbellone+debian@gmail.com> , 2012
+#      Javier Fernández-Sanguino <jfs@debian.org>, 2012
+#
+#  Traductores, si no conoce el formato PO, merece la pena leer la
+#  documentación de gettext, especialmente las secciones dedicadas a este
+#  formato, por ejemplo ejecutando:
+#         info -n '(gettext)PO Files'
+#         info -n '(gettext)Header Entry'
+#
+# Equipo de traducción al español, por favor lean antes de traducir
+# los siguientes documentos:
+#
+# - El proyecto de traducción de Debian al español
+#   https://www.debian.org/intl/spanish/
+#   especialmente las notas y normas de traducción en
+#   https://www.debian.org/intl/spanish/notas
+#
+# - La guía de traducción de po's de debconf:
+#   /usr/share/doc/po-debconf/README-trans
+#   o https://www.debian.org/intl/l10n/po-debconf/README-trans
+#
+# Si tiene dudas o consultas sobre esta traducción consulte con el último
+# traductor (campo Last-Translator) y ponga en copia a la lista de
+# traducción de Debian al español (<debian-l10n-spanish@lists.debian.org>)
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: nvidia-graphics-drivers\n"
+"Report-Msgid-Bugs-To: nvidia-graphics-drivers@packages.debian.org\n"
+"POT-Creation-Date: 2023-01-09 15:40+0100\n"
+"PO-Revision-Date: 2012-10-03 00:02+0200\n"
+"Last-Translator: Javier Fernández-Sanguino Peña <jfs@debian.org>\n"
+"Language-Team: Debian L10N Spanish <debian-l10n-spanish@lists.debian.org>\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Virtaal 0.7.1\n"
+
+#. Type: boolean
+#. Description
+#. Translators, please only translate this file in src:nvidia-graphics-drivers.
+#. From there it will be merged into all other src:nvidia-graphics-drivers-*
+#. packages.
+#. Translators, do not translate the ${substitution} ${variables}.
+#. ${vendor} will be substituted with 'NVIDIA' or 'Fglrx' (without quotes, of
+#. course), ${free_name} will become 'Nouveau' or 'Radeon' (no quotes, again)
+#. and the ${*driver} variables will be replaced with package names.
+#: ../nvidia-legacy-check.templates:3001
+msgid "Install ${vendor} driver despite unsupported graphics card?"
+msgstr ""
+"¿Desea instalar el controlador ${vendor} aún cuando su tarjeta gráfica no "
+"sea compatible?"
+
+#. Type: boolean
+#. Description
+#: ../nvidia-legacy-check.templates:3001
+msgid ""
+"This system has a graphics card which is no longer handled by the ${vendor} "
+"driver (package ${driver}). You may wish to keep the package installed - for "
+"instance to drive some other card - but the card with the following chipset "
+"won't be usable:"
+msgstr ""
+"Este sistema tiene una tarjeta gráfica que ya no puede administrar el "
+"controlador ${vendor} (paquete «${driver}»). Tal vez quiera mantener el "
+"paquete instalado (por ejemplo para controlar alguna otra tarjeta), pero no "
+"podrá utilizarse para gestionar la tarjeta mostrada a continuación:"
+
+#. Type: boolean
+#. Description
+#: ../nvidia-legacy-check.templates:3001
+msgid ""
+"The above card requires either the non-free legacy ${vendor} driver (package "
+"${legacy_driver}) or the free ${free_name} driver (package ${free_driver})."
+msgstr ""
+"La tarjeta arriba mencionada requiere o bien del controlador no libre y "
+"obsoleto ${vendor} (paquete «${legacy_driver}») o el controlador libre "
+"${free_name} (paquete «${free_driver}»)."
+
+#. Type: boolean
+#. Description
+#: ../nvidia-legacy-check.templates:3001
+msgid ""
+"Use the update-glx command to switch between different installed drivers."
+msgstr ""
+
+#. Type: boolean
+#. Description
+#: ../nvidia-legacy-check.templates:3001
+msgid ""
+"Before the ${free_name} driver can be used you must remove ${vendor} "
+"configuration from xorg.conf (and xorg.conf.d/)."
+msgstr ""
+"Antes de poder utilizar el controlador ${free_name} debe eliminar la "
+"configuración de ${vendor} de «xorg.conf» (y de «xorg.conf.d/»)."

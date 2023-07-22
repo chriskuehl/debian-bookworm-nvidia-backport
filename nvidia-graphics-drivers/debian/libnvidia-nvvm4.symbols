@@ -1,0 +1,26 @@
+libnvidia-nvvm.so.4 #PACKAGE# #MINVER#
+* Build-Depends-Package: #PACKAGE#
+ (arch=!arm64 !ppc64el)NvCliCompileBitcode@Base 515
+ (arch=!arm64 !ppc64el)NvCliCompileLogFree@Base 515
+ (arch=!arm64 !ppc64el)NvCliCompileProgram@Base 515
+ (arch=!arm64 !ppc64el)NvCliCompileSource@Base 515
+ (arch=!arm64 !ppc64el)NvCliCompiledProgramFree@Base 515
+ (arch=!arm64 !ppc64el)NvCliFreeBuffer@Base 515
+ (arch=!arm64 !ppc64el)NvCliGetBufferData@Base 515
+ (arch=!arm64 !ppc64el)NvCliLinkBitcode@Base 515
+ (arch=!arm64 !ppc64el)NvCliQueryBinaryType@Base 515
+ __nvvmHandle@Base 470
+ nvvmAddModuleToProgram@Base 470
+ nvvmCompileProgram@Base 470
+ (arch=!arm64 !ppc64el)nvvmCompilerProperty@Base 515
+ nvvmCreateProgram@Base 470
+ nvvmDestroyProgram@Base 470
+ nvvmGetCompiledResult@Base 470
+ nvvmGetCompiledResultSize@Base 470
+ nvvmGetErrorString@Base 470
+ nvvmGetProgramLog@Base 470
+ nvvmGetProgramLogSize@Base 470
+ nvvmIRVersion@Base 470
+ nvvmLazyAddModuleToProgram@Base 470
+ nvvmVerifyProgram@Base 470
+ nvvmVersion@Base 470

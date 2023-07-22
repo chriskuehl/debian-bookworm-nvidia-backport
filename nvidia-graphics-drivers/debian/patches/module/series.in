@@ -1,0 +1,15 @@
+cc_version_check-gcc5.patch
+bashisms.patch
+
+# kernel support
+0001-bump-minimum-supported-kernel-version-to-3.10.patch
+0002-conftest.sh-remove-empty-lines-from-uts_release-outp.patch
+0010-backport-pci-dma-changes-for-ppc64el.patch
+ppc64el.patch
+
+# build system updates
+fragile-ARCH.patch
+use-kbuild-compiler.patch
+use-kbuild-flags.patch
+conftest-verbose.patch
+conftest-prefer-arch-headers.patch

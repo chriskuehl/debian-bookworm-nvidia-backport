@@ -1,0 +1,3 @@
+libnvidia-rtcore.so.#VERSION# #PACKAGE# #MINVER#
+ rtcGetExportTable@Base 410
+ rtcGetVersion@Base 525
