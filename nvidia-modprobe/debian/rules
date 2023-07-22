@@ -1,0 +1,30 @@
+#!/usr/bin/make -f
+
+#export DH_VERBOSE=1
+export NV_VERBOSE=1
+
+# see FEATURE AREAS in dpkg-buildflags(1)
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+
+include /usr/share/dpkg/buildflags.mk
+include /usr/share/dpkg/pkg-info.mk
+
+export PREFIX		 = /usr
+export DO_STRIP		 =
+export CC_ONLY_CFLAGS	 = $(CPPFLAGS)
+export HOST_CC_ONLY_CFLAGS	 = $(CPPFLAGS)
+export OUTPUTDIR	 = _out/debian
+
+ifneq (,$(filter noopt,$(DEB_BUILD_OPTIONS)))
+export DEBUG		 = 1
+endif
+
+
+%:
+	dh $@
+
+execute_after_dh_fixperms:
+	chmod 04755 debian/nvidia-modprobe/usr/bin/nvidia-modprobe
+
+execute_after_dh_auto_clean:
+	$(RM) -r _out
