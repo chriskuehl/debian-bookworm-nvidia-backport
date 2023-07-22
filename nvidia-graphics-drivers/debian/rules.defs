@@ -15,8 +15,8 @@ LINUX_KMOD_TESTED	 = 6.2
 
 ARCH_LIST		 = amd64
 ARCH_LIST		+= i386
-ARCH_LIST		+= armhf
-ARCH_LIST		+= arm64
+#ARCH_LIST		+= armhf
+#ARCH_LIST		+= arm64
 ARCH_LIST		+= ppc64el
 NO_DRIVER_ARCH_LIST	 = i386 armhf
 ifeq (,$(TESLA_MAJOR))

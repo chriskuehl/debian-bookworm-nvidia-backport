@@ -2,3 +2,11 @@ libnvidia-encode.so.1 #PACKAGE# #MINVER#
 * Build-Depends-Package: #PACKAGE#
  NvEncodeAPICreateInstance@Base 310
  NvEncodeAPIGetMaxSupportedVersion@Base 367
+ NvToolCreateInterface@Base 535
+ NvToolDestroyInterface@Base 535
+ NvToolGetApiFunctionCount@Base 535
+ NvToolGetApiID@Base 535
+ NvToolGetApiNames@Base 535
+ NvToolGetInterface@Base 535
+ NvToolSetApiID@Base 535
+ NvToolSetInterface@Base 535

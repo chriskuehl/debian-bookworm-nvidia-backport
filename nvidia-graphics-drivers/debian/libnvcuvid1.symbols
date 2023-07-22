@@ -1,5 +1,13 @@
 libnvcuvid.so.1 #PACKAGE# #MINVER#
 * Build-Depends-Package: #PACKAGE#
+ NvToolCreateInterface@Base 535
+ NvToolDestroyInterface@Base 535
+ NvToolGetApiFunctionCount@Base 535
+ NvToolGetApiID@Base 535
+ NvToolGetApiNames@Base 535
+ NvToolGetInterface@Base 535
+ NvToolSetApiID@Base 535
+ NvToolSetInterface@Base 535
  __std_1U4S4U_X02@Base 310
  __std_2U4S4U_X08@Base 387
  __std_4U4S4U_X04@Base 415

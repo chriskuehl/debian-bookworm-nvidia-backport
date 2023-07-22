@@ -65,3 +65,7 @@ nvidia-ngx-updater
 libEGL.so.#VERSION#
 
 libnvidia-compiler-next.so.#VERSION#
+
+RIM_GH100PROD.swidtag
+libnvidia-pkcs11-openssl3.so.#VERSION#
+libnvidia-pkcs11.so.#VERSION#

@@ -1,6 +1,6 @@
 Test-Command: env BUILD_EXCLUSIVE_CONFIG="!CONFIG_PREEMPT_RT !CONFIG_PREEMPT_RT_FULL" /usr/share/modass/module-assistant-autopkgtest nvidia-kernel
 Features: test-name=m-a-autopkgtest
-Architecture: amd64 arm64
+Architecture: amd64
 Depends:
  nvidia-kernel-source,
  module-assistant-autopkgtest,

@@ -1,3 +1,9 @@
+nvidia-graphics-drivers (535.86.05-1~bpo1) experimental; urgency=medium
+
+  * Package 535.86.05
+
+ -- Chris Kuehl <ckuehl@ckuehl.me>  Fri, 21 Jul 2023 18:58:02 -0500
+
 nvidia-graphics-drivers (530.41.03-1) experimental; urgency=medium
 
   * New upstream release 530.41.03 (2023-03-23).  (Closes: #1033602)

@@ -151,6 +151,7 @@ libcuda.so.1 #PACKAGE# #MINVER# | libcuda.so.1 #MINVER#
  cuGraphAddMemFreeNode@Base 470
  cuGraphAddMemcpyNode@Base 410
  cuGraphAddMemsetNode@Base 410
+ cuGraphAddNode@Base 535
  cuGraphBatchMemOpNodeGetParams@Base 515
  cuGraphBatchMemOpNodeSetParams@Base 515
  cuGraphChildGraphNodeGetGraph@Base 410
@@ -176,6 +177,7 @@ libcuda.so.1 #PACKAGE# #MINVER# | libcuda.so.1 #MINVER#
  cuGraphExecKernelNodeSetParams_v2@Base 525
  cuGraphExecMemcpyNodeSetParams@Base 440
  cuGraphExecMemsetNodeSetParams@Base 440
+ cuGraphExecNodeSetParams@Base 535
  cuGraphExecUpdate@Base 440
  cuGraphExecUpdate_v2@Base 525
  cuGraphExternalSemaphoresSignalNodeGetParams@Base 460
@@ -213,6 +215,7 @@ libcuda.so.1 #PACKAGE# #MINVER# | libcuda.so.1 #MINVER#
  cuGraphNodeGetEnabled@Base 510
  cuGraphNodeGetType@Base 410
  cuGraphNodeSetEnabled@Base 510
+ cuGraphNodeSetParams@Base 535
  cuGraphReleaseUserObject@Base 465
  cuGraphRemoveDependencies@Base 410
  cuGraphRetainUserObject@Base 465
@@ -281,6 +284,7 @@ libcuda.so.1 #PACKAGE# #MINVER# | libcuda.so.1 #MINVER#
  cuMemAddressFree@Base 440
  cuMemAddressReserve@Base 440
  cuMemAdvise@Base 361.28
+ cuMemAdvise_v2@Base 535
  cuMemAlloc@Base 169
  cuMemAllocAsync@Base 460
  cuMemAllocAsync_ptsz@Base 460
@@ -333,6 +337,8 @@ libcuda.so.1 #PACKAGE# #MINVER# | libcuda.so.1 #MINVER#
  cuMemPoolTrimTo@Base 460
  cuMemPrefetchAsync@Base 367
  cuMemPrefetchAsync_ptsz@Base 367
+ cuMemPrefetchAsync_v2@Base 535
+ cuMemPrefetchAsync_v2_ptsz@Base 535
  cuMemRangeGetAttribute@Base 367.44
  cuMemRangeGetAttributes@Base 367.44
  cuMemRelease@Base 440

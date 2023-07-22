@@ -947,24 +947,6 @@ Description: NVIDIA CUDA Debugger Library${nvidia:VariantDesc}
  .
  This package contains the CUDA Debugger library for Pascal and later GPUs.
 
-Package: lib${nvidia}-compiler
-Architecture: i386 amd64
-Multi-Arch: same
-Pre-Depends:
- ${misc:Pre-Depends}
-Depends:
- ${shlibs:Depends}, ${misc:Depends}
-Provides:
- libnvidia-compiler-${nvidia:Version},
-Conflicts:
- libnvidia-compiler-${nvidia:Version},
-Description: NVIDIA runtime compiler library${nvidia:VariantDesc}
- The Compute Unified Device Architecture (CUDA) enables NVIDIA
- graphics processing units (GPUs) to be used for massively parallel
- general purpose computation.
- .
- This package contains the runtime compiler library.
-
 Package: lib${nvidia}-ptxjitcompiler1
 Architecture: i386 amd64 ${arch:arm64} ${arch:ppc64el}
 Multi-Arch: same
