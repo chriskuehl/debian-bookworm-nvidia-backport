@@ -4,7 +4,6 @@ bashisms.patch
 # kernel support
 0001-bump-minimum-supported-kernel-version-to-3.10.patch
 0002-conftest.sh-remove-empty-lines-from-uts_release-outp.patch
-0010-backport-pci-dma-changes-for-ppc64el.patch
 ppc64el.patch
 
 # build system updates
