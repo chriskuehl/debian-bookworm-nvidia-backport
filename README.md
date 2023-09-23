@@ -1,7 +1,7 @@
 NVIDIA 535 driver backport for Debian Bookworm
 ====
 
-This repo contains sources to build an unofficial backport of the 535.86.05
+This repo contains sources to build an unofficial backport of the 535.113.01
 NVIDIA driver for Debian Bookworm. It also contains pre-built Debian packages
 under GitHub Releases:
 https://github.com/chriskuehl/debian-bookworm-nvidia-535-backport/releases
