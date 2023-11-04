@@ -343,10 +343,6 @@ static int modprobe_helper(const int print_errors, const char *module_name,
              */
             silence_current_process();
 
-            /* Workaround for debian's /etc/modprobe.d/nvidia.conf configuration.
-             * See Bug#888952 for details */
-            setuid(0);
-
             execle(modprobe_path, "modprobe",
                    module_name, NULL, envp);
 
@@ -1023,6 +1019,7 @@ int nvidia_cap_mknod(const char* cap_file_path, int *minor)
     int major;
     char name[NV_MAX_CHARACTER_DEVICE_FILE_STRLEN];
     int ret;
+    mode_t mode = 0755;
 
     ret = nvidia_cap_get_device_file_attrs(cap_file_path, &major, minor, name);
     if (ret == 0)
@@ -1030,8 +1027,14 @@ int nvidia_cap_mknod(const char* cap_file_path, int *minor)
         return 0;
     }
 
-    ret = mkdir("/dev/"NV_CAPS_MODULE_NAME, 0755);
+    ret = mkdir("/dev/"NV_CAPS_MODULE_NAME, mode);
     if ((ret != 0) && (errno != EEXIST))
+    {
+        return 0;
+    }
+
+    if ((chmod("/dev/"NV_CAPS_MODULE_NAME, mode) != 0) ||
+        (chown("/dev/"NV_CAPS_MODULE_NAME, 0, 0) != 0))
     {
         return 0;
     }
@@ -1061,6 +1064,47 @@ int nvidia_cap_get_file_state(const char* cap_file_path)
 
     return get_file_state_helper(path, major, minor,
                                  cap_file_path, uid, gid, mode);
+}
+
+/*
+ * Attempt to enable auto onlining mode online_movable
+ */
+int nvidia_enable_auto_online_movable(const int print_errors)
+{
+    int fd;
+    const char path_to_file[] = "/sys/devices/system/memory/auto_online_blocks";
+    const char str[] = "online_movable";
+    ssize_t write_count;
+
+    fd = open(path_to_file, O_RDWR, 0);
+    if (fd < 0)
+    {
+        if (print_errors)
+        {
+            fprintf(stderr,
+                    "NVIDIA: failed to open `%s`: %s.\n",
+                    path_to_file, strerror(errno));
+        }
+        return 0;
+    }
+
+    write_count = write(fd, str, sizeof(str));
+    if (write_count != sizeof(str))
+    {
+        if (print_errors)
+        {
+            fprintf(stderr,
+                    "NVIDIA: unable to write to `%s`: %s.\n",
+                    path_to_file, strerror(errno));
+        }
+
+        close(fd);
+        return 0;
+    }
+
+    close(fd);
+
+    return 1;
 }
 
 #endif /* NV_LINUX */
