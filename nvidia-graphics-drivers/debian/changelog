@@ -1,3 +1,9 @@
+nvidia-graphics-drivers (545.29.02-1~bpo1) UNRELEASED; urgency=medium
+
+  * Package 545.29.02
+
+ -- Chris Kuehl <ckuehl@ckuehl.me>  Sat, 04 Nov 2023 12:41:09 -0500
+
 nvidia-graphics-drivers (535.113.01-1~bpo1) experimental; urgency=medium
 
   * Package 535.113.01
