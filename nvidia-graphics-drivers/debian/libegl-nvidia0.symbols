@@ -8,3 +8,5 @@ libEGL_nvidia.so.0 #PACKAGE# #MINVER#
  vk_icdGetInstanceProcAddr@Base 390.25
  vk_icdGetPhysicalDeviceProcAddr@Base 390.25
  vk_icdNegotiateLoaderICDInterfaceVersion@Base 390.25
+libnvidia-gpucomp.so.545.29.02 libegl-nvidia0 #MINVER#
+ nvGetCompilerInterface@Base 545.29.02-1~bpo1

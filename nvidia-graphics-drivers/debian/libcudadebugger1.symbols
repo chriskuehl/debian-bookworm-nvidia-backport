@@ -2,6 +2,7 @@ libcudadebugger.so.1 #PACKAGE# #MINVER#
 * Build-Depends-Package: #PACKAGE#
  DebugAgentMain@Base 520
  GetCUDADebuggerAPI@Base 520
+ GetCUDADebuggerAPIVersion@Base 545.29.02-1~bpo1
  InitializeInjection@Base 520
  LaunchDebugAgentExecutable@Base 520
  _ZN5boost6system6detail18generic_cat_holderIvE8instanceE@Base 520

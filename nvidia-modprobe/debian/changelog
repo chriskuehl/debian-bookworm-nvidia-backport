@@ -1,3 +1,9 @@
+nvidia-modprobe (545.29.02-1~bpo1) unstable; urgency=medium
+
+  * Backport 545.29.02
+
+ -- Chris Kuehl <ckuehl@ckuehl.me>  Sat, 04 Nov 2023 13:21:01 -0500
+
 nvidia-modprobe (535.54.03-1~bpo1) unstable; urgency=medium
 
   * Backport

@@ -110,6 +110,7 @@ libcuda.so.1 #PACKAGE# #MINVER# | libcuda.so.1 #MINVER#
  cuFlushGPUDirectRDMAWrites@Base 465
  cuFuncGetAttribute@Base 185
  cuFuncGetModule@Base 450
+ cuFuncGetName@Base 545.29.02-1~bpo1
  cuFuncSetAttribute@Base 384
  cuFuncSetBlockShape@Base 169
  cuFuncSetCacheConfig@Base 195.30
@@ -139,6 +140,7 @@ libcuda.so.1 #PACKAGE# #MINVER# | libcuda.so.1 #MINVER#
  cuGraphAddBatchMemOpNode@Base 515
  cuGraphAddChildGraphNode@Base 410
  cuGraphAddDependencies@Base 410
+ cuGraphAddDependencies_v2@Base 545.29.02-1~bpo1
  cuGraphAddEmptyNode@Base 410
  cuGraphAddEventRecordNode@Base 455
  cuGraphAddEventWaitNode@Base 455
@@ -152,10 +154,12 @@ libcuda.so.1 #PACKAGE# #MINVER# | libcuda.so.1 #MINVER#
  cuGraphAddMemcpyNode@Base 410
  cuGraphAddMemsetNode@Base 410
  cuGraphAddNode@Base 535
+ cuGraphAddNode_v2@Base 545.29.02-1~bpo1
  cuGraphBatchMemOpNodeGetParams@Base 515
  cuGraphBatchMemOpNodeSetParams@Base 515
  cuGraphChildGraphNodeGetGraph@Base 410
  cuGraphClone@Base 410
+ cuGraphConditionalHandleCreate@Base 545.29.02-1~bpo1
  cuGraphCreate@Base 410
  cuGraphDebugDotPrint@Base 465
  cuGraphDestroy@Base 410
@@ -185,6 +189,7 @@ libcuda.so.1 #PACKAGE# #MINVER# | libcuda.so.1 #MINVER#
  cuGraphExternalSemaphoresWaitNodeGetParams@Base 460
  cuGraphExternalSemaphoresWaitNodeSetParams@Base 460
  cuGraphGetEdges@Base 410
+ cuGraphGetEdges_v2@Base 545.29.02-1~bpo1
  cuGraphGetNodes@Base 410
  cuGraphGetRootNodes@Base 410
  cuGraphHostNodeGetParams@Base 410
@@ -211,13 +216,16 @@ libcuda.so.1 #PACKAGE# #MINVER# | libcuda.so.1 #MINVER#
  cuGraphMemsetNodeSetParams@Base 410
  cuGraphNodeFindInClone@Base 410
  cuGraphNodeGetDependencies@Base 410
+ cuGraphNodeGetDependencies_v2@Base 545.29.02-1~bpo1
  cuGraphNodeGetDependentNodes@Base 410
+ cuGraphNodeGetDependentNodes_v2@Base 545.29.02-1~bpo1
  cuGraphNodeGetEnabled@Base 510
  cuGraphNodeGetType@Base 410
  cuGraphNodeSetEnabled@Base 510
  cuGraphNodeSetParams@Base 535
  cuGraphReleaseUserObject@Base 465
  cuGraphRemoveDependencies@Base 410
+ cuGraphRemoveDependencies_v2@Base 545.29.02-1~bpo1
  cuGraphRetainUserObject@Base 465
  cuGraphUpload@Base 455
  cuGraphUpload_ptsz@Base 455
@@ -249,6 +257,7 @@ libcuda.so.1 #PACKAGE# #MINVER# | libcuda.so.1 #MINVER#
  cuIpcOpenMemHandle_v2@Base 450.66
  cuKernelGetAttribute@Base 525
  cuKernelGetFunction@Base 525
+ cuKernelGetName@Base 545.29.02-1~bpo1
  cuKernelSetAttribute@Base 525
  cuKernelSetCacheConfig@Base 525
  cuLaunch@Base 169
@@ -492,6 +501,8 @@ libcuda.so.1 #PACKAGE# #MINVER# | libcuda.so.1 #MINVER#
  cuStreamBatchMemOp_v2@Base 515
  cuStreamBatchMemOp_v2_ptsz@Base 515
  cuStreamBeginCapture@Base 410
+ cuStreamBeginCaptureToGraph@Base 545.29.02-1~bpo1
+ cuStreamBeginCaptureToGraph_ptsz@Base 545.29.02-1~bpo1
  cuStreamBeginCapture_ptsz@Base 410
  cuStreamBeginCapture_v2@Base 418
  cuStreamBeginCapture_v2_ptsz@Base 418
@@ -509,6 +520,8 @@ libcuda.so.1 #PACKAGE# #MINVER# | libcuda.so.1 #MINVER#
  cuStreamGetCaptureInfo_ptsz@Base 418
  cuStreamGetCaptureInfo_v2@Base 465
  cuStreamGetCaptureInfo_v2_ptsz@Base 465
+ cuStreamGetCaptureInfo_v3@Base 545.29.02-1~bpo1
+ cuStreamGetCaptureInfo_v3_ptsz@Base 545.29.02-1~bpo1
  cuStreamGetCtx@Base 396
  cuStreamGetCtx_ptsz@Base 396
  cuStreamGetFlags@Base 319
@@ -527,6 +540,8 @@ libcuda.so.1 #PACKAGE# #MINVER# | libcuda.so.1 #MINVER#
  cuStreamSynchronize_ptsz@Base 346
  cuStreamUpdateCaptureDependencies@Base 465
  cuStreamUpdateCaptureDependencies_ptsz@Base 465
+ cuStreamUpdateCaptureDependencies_v2@Base 545.29.02-1~bpo1
+ cuStreamUpdateCaptureDependencies_v2_ptsz@Base 545.29.02-1~bpo1
  cuStreamWaitEvent@Base 260
  cuStreamWaitEvent_ptsz@Base 346
  cuStreamWaitValue32@Base 361.42
